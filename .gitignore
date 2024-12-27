@@ -1,0 +1,14 @@
+*.DS_Store
+*.xcscheme
+*xcuserdatad
+*.orig
+*xcshareddata
+*xcuserstate
+.idea
+DerivedData
+.artifacts
+iScanner-loc-iOS_generated.swift
+/derivedData/
+/build/
+/fastlane/report.xml
+

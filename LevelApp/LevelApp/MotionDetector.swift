@@ -58,9 +58,9 @@ private extension MotionDetector {
         let yGravity = motion.gravity.y
             
         let theta = atan2(xGravity, yGravity)
-        deviceRoll = (theta - .pi)
+        deviceRoll = (theta - .pi) * -1
         
-        print("theta: \(theta * (180.0 / .pi)), deviceRollAngle: \(deviceRoll * (180.0 / .pi))")
+//        print("theta: \(theta * (180.0 / .pi)), deviceRollAngle: \(deviceRoll * (180.0 / .pi))")
         
         onUpdate()
     }

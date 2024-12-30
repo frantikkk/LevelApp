@@ -20,7 +20,7 @@ class HorizonIndicatorView: UIView {
         }
     }
     
-    var rotationReference: CGFloat = 0.0 {
+    var zeroReference: CGFloat = 0.0 {
         didSet {
             setNeedsDisplay()
         }
@@ -30,19 +30,23 @@ class HorizonIndicatorView: UIView {
         -rotation
     }
     
-    var indicatorRotationReference: CGFloat {
-        -rotationReference
+    var indicatorZeroReference: CGFloat {
+        -zeroReference
+    }
+    
+    var relativeRotation: CGFloat {
+        // For example, rotation is 15 deg, zero reference is 30 degress.
+        // We are in scope of 0-359 deg, so 15 deg minus 30 deg should return 345, but not -15.
+        let relativeRotation = rotation - zeroReference
+        return relativeRotation < 0 ? relativeRotation + 2 * .pi : relativeRotation
     }
     
     var displayingRotationAngle: Int {
         
-//        return Int(rotation * 180 / .pi)
-        
-        guard rotationReference == 0 else {
-            var relativeRotation = rotation - rotationReference
-            if relativeRotation < 0 {
-                relativeRotation = relativeRotation + 2 * .pi
-            }
+        guard zeroReference == 0 else {
+            // For example, rotation is 15 deg, zero reference is 30 degress.
+            // We are in scope of 0-359 deg, so 15 deg minus 30 deg should return 345, but not -15.
+            
             return Int(relativeRotation * 180 / .pi)
         }
         
@@ -61,7 +65,6 @@ class HorizonIndicatorView: UIView {
     }
     
     override func draw(_ rect: CGRect) {
-//        super.draw(rect)
         guard let context = UIGraphicsGetCurrentContext() else { return }
 
         context.clear(rect)
@@ -88,7 +91,7 @@ private extension HorizonIndicatorView {
     }
     
     func drawStaticMarks(in context: CGContext) {
-        context.rotate(by: indicatorRotationReference)
+        context.rotate(by: indicatorZeroReference)
         
         context.setLineWidth(staticMarkHeight)
         context.setStrokeColor(UIColor.white.cgColor)
@@ -101,7 +104,7 @@ private extension HorizonIndicatorView {
         
         context.drawPath(using: .fillStroke)
         
-        context.rotate(by: -indicatorRotationReference)
+        context.rotate(by: -indicatorZeroReference)
     }
     
     func drawDynamicMarks(in context: CGContext) {
@@ -152,7 +155,7 @@ private extension HorizonIndicatorView {
     }
     
     func drawArcs(in context: CGContext) {
-        guard indicatorRotationReference != 0 else { return }
+        guard indicatorZeroReference != 0 else { return }
         
         context.setLineWidth(markLength)
         context.setAlpha(0.5)
@@ -160,13 +163,8 @@ private extension HorizonIndicatorView {
         // Right arc
         context.beginPath()
         
-        var relativeRotation = rotation - rotationReference
-        if relativeRotation < 0 {
-            relativeRotation = relativeRotation + 2 * .pi
-        }
-        
         let startAngle = CGFloat(indicatorRotation)
-        let endAngle = CGFloat(indicatorRotationReference)
+        let endAngle = CGFloat(indicatorZeroReference)
         
         var clockWise = false
         if relativeRotation > .pi {
@@ -180,7 +178,7 @@ private extension HorizonIndicatorView {
         context.beginPath()
         
         let startAngle2: CGFloat = CGFloat(indicatorRotation) + .pi
-        let endAngle2: CGFloat = indicatorRotationReference + .pi
+        let endAngle2: CGFloat = indicatorZeroReference + .pi
         
         var clockWise2 = false
         if relativeRotation > .pi {

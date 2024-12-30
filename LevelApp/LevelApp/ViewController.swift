@@ -41,7 +41,7 @@ private extension ViewController {
         motionDetector.onUpdate = { [weak self] in
             guard let self else { return }
             horizonIndicatorView.rotation = motionDetector.deviceRoll
-            horizonIndicatorView.rotationReference = motionDetector.rollInclinationReference
+            horizonIndicatorView.zeroReference = motionDetector.rollInclinationReference
         }
         
         motionDetector.start()

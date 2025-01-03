@@ -10,13 +10,15 @@ import UIKit
 class HorizonIndicatorView: UIView {
     
     let markLength = 80.0
-    let staticMarkHeight = 2.0
+    let staticMarkHeight = 1.0
     let dynamticMarkHeight = 4.0
     let markCenterOffset = 80.0
     
-    var rotation: CGFloat = 0.0 {
+    var zeroReferenceLocked: Bool = false
+    
+    var rotation: Double = 0.0 {
         didSet {
-            setNeedsDisplay()  // Перерисовать представление при изменении угла
+            setNeedsDisplay()
         }
     }
     
@@ -26,12 +28,19 @@ class HorizonIndicatorView: UIView {
         }
     }
     
+//    var orientationZeroReference: Double = 0.0 {
+//        didSet {
+//            setNeedsDisplay()
+//        }
+//    }
+    
     var indicatorRotation: CGFloat {
         -rotation
     }
     
     var indicatorZeroReference: CGFloat {
         -zeroReference
+//        orientationZeroReference != 0 ? -orientationZeroReference : -zeroReference
     }
     
     var relativeRotation: CGFloat {
@@ -42,6 +51,8 @@ class HorizonIndicatorView: UIView {
     }
     
     var displayingRotationAngle: Int {
+        
+        return Int(rotation.toDeg)
         
         guard zeroReference == 0 else {
             // For example, rotation is 15 deg, zero reference is 30 degress.
@@ -94,7 +105,7 @@ private extension HorizonIndicatorView {
         context.rotate(by: indicatorZeroReference)
         
         context.setLineWidth(staticMarkHeight)
-        context.setStrokeColor(UIColor.white.cgColor)
+        context.setStrokeColor(UIColor.lightGray.cgColor)
         
         context.move(to: CGPoint(x: -(markCenterOffset + markLength), y: 0))
         context.addLine(to: CGPoint(x: -markCenterOffset, y: 0))
@@ -155,7 +166,7 @@ private extension HorizonIndicatorView {
     }
     
     func drawArcs(in context: CGContext) {
-        guard indicatorZeroReference != 0 else { return }
+        guard indicatorZeroReference != 0, zeroReferenceLocked else { return }
         
         context.setLineWidth(markLength)
         context.setAlpha(0.5)

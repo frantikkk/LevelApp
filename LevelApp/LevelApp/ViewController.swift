@@ -11,7 +11,9 @@ class ViewController: UIViewController {
     
     private var horizonIndicatorView: HorizonIndicatorView!
     private var motionDetector: MotionDetector!
-
+    private var rollZeroReference: Double = 0 //.pi / 2
+    private var orientationZeroReference: Double = 0
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -26,11 +28,13 @@ class ViewController: UIViewController {
     }
 
     @IBAction func fixTapped(_ sender: Any) {
-        motionDetector.fixInclinationReference()
+        horizonIndicatorView.zeroReferenceLocked = true
+        rollZeroReference = motionDetector.deviceRoll
     }
     
     @IBAction func resetTapped(_ sender: Any) {
-        motionDetector.resetInclincationReference()
+        horizonIndicatorView.zeroReferenceLocked = false
+        rollZeroReference = 0
     }
     
 }
@@ -40,11 +44,56 @@ private extension ViewController {
         motionDetector = MotionDetector(updateInterval: 0.01)
         motionDetector.onUpdate = { [weak self] in
             guard let self else { return }
-            horizonIndicatorView.rotation = motionDetector.deviceRoll
-            horizonIndicatorView.zeroReference = motionDetector.rollInclinationReference
+            handleMotionUpdate()
+//            horizonIndicatorView.rotation = motionDetector.deviceRoll
+//            horizonIndicatorView.zeroReference = rollZeroReference
         }
         
         motionDetector.start()
+    }
+    
+    func handleMotionUpdate() {
+//        if (rollZeroReference + .pi / 2) - motionDetector.deviceRoll < 20.toRad{
+////            rollZeroReference = rollZeroReference + .pi / 2
+//            rollZeroReference = .pi / 2
+//        }
+        
+        let roll = motionDetector.deviceRoll
+//        let nextRef = rollZeroReference + .pi / 2
+        var nextRef: Double = 0
+        
+        if roll > rollZeroReference {
+            nextRef = rollZeroReference + .pi / 2
+            if nextRef - (rollZeroReference + roll) < 20.toRad {
+                rollZeroReference = nextRef
+            }
+        } else {
+            nextRef = rollZeroReference - .pi / 2
+            if roll < 20.toRad {
+                rollZeroReference = nextRef
+            }
+        }
+        
+//        if roll > rollZeroReference && nextRef - (rollZeroReference + roll) < 20.toRad {
+//            rollZeroReference = nextRef
+//        } else if roll < rollZeroReference
+        
+//        if roll - .pi / 2 > -20.toRad {
+//            rollZeroReference = rollZeroReference + .pi / 2
+//        }
+        
+        horizonIndicatorView.rotation = motionDetector.deviceRoll
+        horizonIndicatorView.zeroReference = rollZeroReference 
+    }
+}
+
+public extension Double {
+    var toDeg: Double {
+        self * 180 / .pi
+    }
+    
+    var toRad: Double {
+        self * .pi / 180
     }
 }
 

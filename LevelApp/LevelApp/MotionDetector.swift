@@ -12,7 +12,6 @@ class MotionDetector {
     private var updateInterval: TimeInterval
     
     var deviceRoll: Double = 0
-    var rollInclinationReference: Double = 0
     
     var onUpdate: (() -> Void) = {}
     
@@ -41,14 +40,6 @@ class MotionDetector {
     func started() -> MotionDetector {
         start()
         return self
-    }
-    
-    func fixInclinationReference() {
-        rollInclinationReference = deviceRoll
-    }
-    
-    func resetInclincationReference() {
-        rollInclinationReference = 0
     }
 }
 

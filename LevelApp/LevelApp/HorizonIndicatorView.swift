@@ -44,13 +44,10 @@ class HorizonIndicatorView: UIView {
     }
     
     var relativeRotation: Double {
-        // For example, rotation is 15 deg, zero reference is 30 degress.
-        // We are in scope of 0-359 deg, so 15 deg minus 30 deg should return 345, but not -15.
-//        let relativeRotation = rotation - zeroReference
-//        return relativeRotation < 0 ? relativeRotation + 2 * .pi : relativeRotation
-//////////////////////////
         let relativeRotation = rotation - zeroReference
         if zeroReferenceLocked {
+            // For example, rotation is 15 deg, zero reference is 30 degress.
+            // We are in scope of 0-359 deg, so 15 deg minus 30 deg should return 345, but not -15.
             return relativeRotation < 0 ? relativeRotation + 2 * .pi : relativeRotation
         } else {
             return relativeRotation > 90.toRad ? relativeRotation - 360.toRad : relativeRotation
@@ -58,32 +55,19 @@ class HorizonIndicatorView: UIView {
     }
     
     var displayingRotationAngle: Int {
-        
-        return Int(rotation.toDeg)
-        
-        guard zeroReference == 0 else {
-            // For example, rotation is 15 deg, zero reference is 30 degress.
-            // We are in scope of 0-359 deg, so 15 deg minus 30 deg should return 345, but not -15.
-            
-            return Int(relativeRotation * 180 / .pi)
-        }
-        
-        let rotationInDeg = Int(rotation * 180 / .pi)
-        switch rotationInDeg {
-        case 0...89:
-            return Int(rotation * 180 / .pi)
-        case 90...179:
-            return Int((rotation - .pi / 2) * 180 / .pi)
-        case 180...269:
-            return Int((rotation - .pi) * 180 / .pi)
-        case 270...359:
-            return Int((rotation - .pi - .pi / 2) * 180 / .pi)
-        default: return Int(rotation * 180 / .pi)
-        }
+        zeroReferenceLocked ? angleDisplayValueLocked : angleDisplayValueNonLocked
     }
     
-    var angleDisplayValue: Int {
+    var angleDisplayValueNonLocked: Int {
         return Int(relativeRotation.toDeg)
+    }
+    
+    var angleDisplayValueLocked: Int {
+        if relativeRotation < 180.toRad {
+            return Int(relativeRotation.toDeg)
+        } else {
+            return Int((relativeRotation - 360.toRad).toDeg)
+        }
     }
     
     override func draw(_ rect: CGRect) {
@@ -156,8 +140,7 @@ private extension HorizonIndicatorView {
         
         context.setStrokeColor(UIColor.white.cgColor)
         
-//        let angleText = "\(displayingRotationAngle) °"
-        let angleText = "\(angleDisplayValue) °"
+        let angleText = "\(displayingRotationAngle) °"
         
         let attributes: [NSAttributedString.Key: Any] = [
             .font: UIFont.systemFont(ofSize: 56, weight: .medium),

@@ -22,7 +22,7 @@ class HorizonIndicatorView: UIView {
         }
     }
     
-    var zeroReference: CGFloat = 0.0 {
+    var zeroReference: Double = 0.0 {
         didSet {
             setNeedsDisplay()
         }
@@ -34,20 +34,27 @@ class HorizonIndicatorView: UIView {
 //        }
 //    }
     
-    var indicatorRotation: CGFloat {
+    var indicatorRotation: Double {
         -rotation
     }
     
-    var indicatorZeroReference: CGFloat {
+    var indicatorZeroReference: Double {
         -zeroReference
 //        orientationZeroReference != 0 ? -orientationZeroReference : -zeroReference
     }
     
-    var relativeRotation: CGFloat {
+    var relativeRotation: Double {
         // For example, rotation is 15 deg, zero reference is 30 degress.
         // We are in scope of 0-359 deg, so 15 deg minus 30 deg should return 345, but not -15.
+//        let relativeRotation = rotation - zeroReference
+//        return relativeRotation < 0 ? relativeRotation + 2 * .pi : relativeRotation
+//////////////////////////
         let relativeRotation = rotation - zeroReference
-        return relativeRotation < 0 ? relativeRotation + 2 * .pi : relativeRotation
+        if zeroReferenceLocked {
+            return relativeRotation < 0 ? relativeRotation + 2 * .pi : relativeRotation
+        } else {
+            return relativeRotation > 90.toRad ? relativeRotation - 360.toRad : relativeRotation
+        }
     }
     
     var displayingRotationAngle: Int {
@@ -75,6 +82,10 @@ class HorizonIndicatorView: UIView {
         }
     }
     
+    var angleDisplayValue: Int {
+        return Int(relativeRotation.toDeg)
+    }
+    
     override func draw(_ rect: CGRect) {
         guard let context = UIGraphicsGetCurrentContext() else { return }
 
@@ -85,6 +96,7 @@ class HorizonIndicatorView: UIView {
 }
 
 private extension HorizonIndicatorView {
+    
     func drawIndicator(at context: CGContext, inclinationReferenceAngle: Double = 0) {
         
         guard let context = UIGraphicsGetCurrentContext() else {
@@ -144,7 +156,8 @@ private extension HorizonIndicatorView {
         
         context.setStrokeColor(UIColor.white.cgColor)
         
-        let angleText = "\(displayingRotationAngle) °"
+//        let angleText = "\(displayingRotationAngle) °"
+        let angleText = "\(angleDisplayValue) °"
         
         let attributes: [NSAttributedString.Key: Any] = [
             .font: UIFont.systemFont(ofSize: 56, weight: .medium),
